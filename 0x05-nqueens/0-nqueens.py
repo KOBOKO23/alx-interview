@@ -1,46 +1,61 @@
 #!/usr/bin/python3
-"""
-N queens problem solution using backtracking
-"""
-
+"""Solution to the N-Queens puzzle"""
 import sys
 
-def n_queens(n):
-    res, queens = [], []
-    cols, pos_diag, neg_diag = set(), set(), set()
 
-    def backtrack(row):
-        if row == n:
-            res.append(queens[:])
-            return
-        for col in range(n):
-            if col in cols or row + col in pos_diag or row - col in neg_diag:
-                continue
-            cols.add(col)
-            pos_diag.add(row + col)
-            neg_diag.add(row - col)
-            queens.append([row, col])
-            backtrack(row + 1)
-            cols.remove(col)
-            pos_diag.remove(row + col)
-            neg_diag.remove(row - col)
-            queens.pop()
+def print_board(board, n):
+    """prints allocated possitions to the queen"""
+    b = []
 
-    backtrack(0)
-    return res
+    for i in range(n):
+        for j in range(n):
+            if j == board[i]:
+                b.append([i, j])
+    print(b)
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        exit(1)
-    n = sys.argv[1]
-    if not n.isdigit() or int(n) < 4:
-        print("N must be a number" if not n.isdigit() else "N must be at least 4")
-        exit(1)
-    solutions = n_queens(int(n))
-    for solution in solutions:
-        print(solution)
 
-if __name__ == "__main__":
-    main()
+def safe_position(board, i, j, r):
+    """Determines whether the position is safe for the queen"""
+    if (board[i] == j) or (board[i] == j - i + r) or (board[i] == i - r + j):
+        return True
+    return False
 
+
+def determine_positions(board, row, n):
+    """Recursively finds all safe positions where the queen can be allocated"""
+    if row == n:
+        print_board(board, n)
+
+    else:
+        for j in range(n):
+            allowed = True
+            for i in range(row):
+                if safe_position(board, i, j, row):
+                    allowed = False
+            if allowed:
+                board[row] = j
+                determine_positions(board, row + 1, n)
+
+
+def create_board(size):
+    """Generates the board"""
+    return [0 * size for i in range(size)]
+
+
+if len(sys.argv) != 2:
+    print("Usage: nqueens N")
+    exit(1)
+
+try:
+    n = int(sys.argv[1])
+except BaseException:
+    print("N must be a number")
+    exit(1)
+
+if (n < 4):
+    print("N must be at least 4")
+    exit(1)
+
+board = create_board(int(n))
+row = 0
+determine_positions(board, row, int(n))
